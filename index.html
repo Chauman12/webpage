@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Datos para Transferencia</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --border: #2a2d3e;
+    --text: #e8eaf0;
+    --muted: #6b7080;
+    --accent: #4f8ef7;
+    --success: #22c55e;
+  }
+
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 16px;
+  }
+
+  .card {
+    width: 100%;
+    max-width: 380px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 28px 24px 24px;
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: 28px;
+  }
+
+  .header-icon {
+    font-size: 32px;
+    display: block;
+    margin-bottom: 10px;
+  }
+
+  .header h1 {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    color: var(--text);
+  }
+
+  .header p {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  .section-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 10px;
+    padding-left: 2px;
+  }
+
+  .accounts {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+
+  .account-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 14px;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+  }
+
+  .account-row:hover {
+    border-color: var(--accent);
+    background: #131520;
+  }
+
+  .account-row:active {
+    background: #0d1018;
+  }
+
+  .account-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+  }
+
+  .bank-icon {
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+
+  .bank-info {
+    min-width: 0;
+  }
+
+  .bank-name {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--muted);
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+  }
+
+  .account-number {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .copy-btn {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--accent);
+    background: rgba(79, 142, 247, 0.1);
+    border: none;
+    border-radius: 7px;
+    padding: 5px 10px;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    pointer-events: none; /* el click lo maneja el row */
+    letter-spacing: 0.2px;
+  }
+
+  .account-row.copied .copy-btn {
+    color: var(--success);
+    background: rgba(34, 197, 94, 0.12);
+  }
+
+  .copy-icon { font-size: 13px; }
+
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 20px 0;
+  }
+
+  .footer {
+    text-align: center;
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: #22c55e;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 10px 20px;
+    border-radius: 30px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s;
+    opacity: 0;
+    pointer-events: none;
+    white-space: nowrap;
+    z-index: 999;
+  }
+
+  .toast.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="header">
+    <span class="header-icon">💳</span>
+    <h1>Datos para Transferencia</h1>
+    <p>Tocá el número para copiarlo</p>
+  </div>
+
+  <div class="section-label">🏦 Bancos</div>
+
+  <div class="accounts" id="accounts">
+
+    <div class="account-row" onclick="copyNumber(this, '001643485-00001')">
+      <div class="account-left">
+        <span class="bank-icon">🟢</span>
+        <div class="bank-info">
+          <div class="bank-name">BROU</div>
+          <div class="account-number">001643485-00001</div>
+        </div>
+      </div>
+      <div class="copy-btn"><span class="copy-icon">📋</span><span class="copy-label">Copiar</span></div>
+    </div>
+
+    <div class="account-row" onclick="copyNumber(this, '001207444363')">
+      <div class="account-left">
+        <span class="bank-icon">🔴</span>
+        <div class="bank-info">
+          <div class="bank-name">Santander</div>
+          <div class="account-number">001207444363</div>
+        </div>
+      </div>
+      <div class="copy-btn"><span class="copy-icon">📋</span><span class="copy-label">Copiar</span></div>
+    </div>
+
+    <div class="account-row" onclick="copyNumber(this, '759397')">
+      <div class="account-left">
+        <span class="bank-icon">🔵</span>
+        <div class="bank-info">
+          <div class="bank-name">Itaú</div>
+          <div class="account-number">759397</div>
+        </div>
+      </div>
+      <div class="copy-btn"><span class="copy-icon">📋</span><span class="copy-label">Copiar</span></div>
+    </div>
+
+    <div class="account-row" onclick="copyNumber(this, '25680901')">
+      <div class="account-left">
+        <span class="bank-icon">🔵</span>
+        <div class="bank-info">
+          <div class="bank-name">BBVA</div>
+          <div class="account-number">25680901</div>
+        </div>
+      </div>
+      <div class="copy-btn"><span class="copy-icon">📋</span><span class="copy-label">Copiar</span></div>
+    </div>
+
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="section-label">📲 Giros / Billeteras</div>
+
+  <div class="accounts">
+
+    <div class="account-row" onclick="copyNumber(this, '385724')">
+      <div class="account-left">
+        <span class="bank-icon">🟣</span>
+        <div class="bank-info">
+          <div class="bank-name">PREX</div>
+          <div class="account-number">385724</div>
+        </div>
+      </div>
+      <div class="copy-btn"><span class="copy-icon">📋</span><span class="copy-label">Copiar</span></div>
+    </div>
+
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="footer">Tocá cualquier número para copiarlo al portapapeles.<br>Luego pegalo directamente en tu banco.</div>
+</div>
+
+<div class="toast" id="toast">✅ ¡Número copiado!</div>
+
+<script>
+  let toastTimeout;
+
+  function copyNumber(row, number) {
+    // Intentar copiar con la API moderna
+    const copyText = () => {
+      navigator.clipboard.writeText(number).then(() => {
+        showFeedback(row, number);
+      }).catch(() => {
+        fallbackCopy(number);
+        showFeedback(row, number);
+      });
+    };
+
+    // Fallback para navegadores sin clipboard API
+    const fallbackCopy = (text) => {
+      const el = document.createElement('textarea');
+      el.value = text;
+      el.style.position = 'fixed';
+      el.style.opacity = '0';
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand('copy');
+      document.body.removeChild(el);
+    };
+
+    copyText();
+  }
+
+  function showFeedback(row, number) {
+    // Reset all rows
+    document.querySelectorAll('.account-row.copied').forEach(r => {
+      r.classList.remove('copied');
+      r.querySelector('.copy-label').textContent = 'Copiar';
+      r.querySelector('.copy-icon').textContent = '📋';
+    });
+
+    // Mark this row
+    row.classList.add('copied');
+    row.querySelector('.copy-label').textContent = '¡Listo!';
+    row.querySelector('.copy-icon').textContent = '✅';
+
+    setTimeout(() => {
+      row.classList.remove('copied');
+      row.querySelector('.copy-label').textContent = 'Copiar';
+      row.querySelector('.copy-icon').textContent = '📋';
+    }, 2000);
+
+    // Toast
+    const toast = document.getElementById('toast');
+    toast.classList.add('show');
+    clearTimeout(toastTimeout);
+    toastTimeout = setTimeout(() => toast.classList.remove('show'), 2000);
+  }
+</script>
+
+</body>
+</html>
